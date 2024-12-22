@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//Works on examples but not on input, I call it good enough.
 public class Part2 {
 
     private static Map<Character, Map.Entry<Integer, Integer>> m1 = new HashMap<>();
@@ -55,48 +54,38 @@ public class Part2 {
     private static long bigKeypad(String code) {
         char pos = 'A';
         long result = 0;
-        List<Character> test = new ArrayList<>();
         for (char c : code.toCharArray()) {
             List<Character> dir = directions(m1.get(pos), m1.get(c));
-            result += smallKeypad(dir, 25, m1.get(pos), test);
+            result += smallKeypad(dir, 25, m1.get(pos), true);
             pos = c;
         }
-//        System.out.println(test.stream().map(String::valueOf).reduce(String::concat).get());
         return result;
     }
 
-    private static long smallKeypad(List<Character> dirs, int depth, Map.Entry<Integer, Integer> bigPos, List<Character> test) {
+    private static long smallKeypad(List<Character> dirs, int depth, Map.Entry<Integer, Integer> pos, boolean bigKeypad) {
         if (depth == 0) {
-            test.addAll(dirs);
-            test.add('A');
             return dirs.size() + 1;
         }
-        if (cache.containsKey(dirs.toString() + depth + bigPos)) {
-            return cache.get(dirs.toString() + depth + bigPos);
+        if (cache.containsKey(dirs.toString() + depth + pos)) {
+            return cache.get(dirs.toString() + depth + pos);
         }
-        Set<List<Character>> perms = filteredPerm(new ArrayList<>(dirs), bigPos);
+        Set<List<Character>> perms = filteredPerm(new ArrayList<>(dirs), pos, bigKeypad);
         long result = Long.MAX_VALUE;
-        List<Character> test1 = new ArrayList<>();
         for (List<Character> line : perms) {
             char prev = 'A';
             line.add('A');
             long smallestResult = 0;
-            List<Character> test2 = new ArrayList<>();
             for (char c : line) {
-                smallestResult += smallKeypad(directions(m2.get(prev), m2.get(c)), depth - 1, null, test2);
+                smallestResult += smallKeypad(directions(m2.get(prev), m2.get(c)), depth - 1, m2.get(prev), false);
                 prev = c;
-            }
-            if (smallestResult < result) {
-                test1 = test2;
             }
             result = Math.min(smallestResult, result);
         }
-        test.addAll(test1);
-        cache.put(dirs.toString() + depth + bigPos, result);
+        cache.put(dirs.toString() + depth + pos, result);
         return result;
     }
 
-    private static List<Character> directions(Map.Entry<Integer, Integer> cur,  Map.Entry<Integer, Integer> next) {
+    private static List<Character> directions(Map.Entry<Integer, Integer> cur, Map.Entry<Integer, Integer> next) {
         List<Character> result = new ArrayList<>();
         for (int i = 0; i < Math.abs(next.getValue() - cur.getValue()); i++) {
             if (Math.signum(next.getValue() - cur.getValue()) < 0) {
@@ -115,17 +104,12 @@ public class Part2 {
         return result;
     }
 
-    private static Set<List<Character>> filteredPerm(List<Character> original, Map.Entry<Integer, Integer> bigPos) {
+    private static Set<List<Character>> filteredPerm(List<Character> original, Map.Entry<Integer, Integer> position, boolean bigKeypad) {
         return generatePerm(original).stream().filter(e -> {
-            Map.Entry<Integer, Integer> pos;
-            if (bigPos != null) {
-                pos = bigPos;
-            } else {
-                 pos = Map.entry(2, 0);
-            }
+            Map.Entry<Integer, Integer> pos = position;
             for (char c : e) {
                 pos = Map.entry(pos.getKey() + dir.get(c).getKey(), pos.getValue() + dir.get(c).getValue());
-                if (pos.getKey() == 0 && ((pos.getValue() == 3 && bigPos != null) || (pos.getValue() == 0 && bigPos == null))) {
+                if (pos.getKey() == 0 && ((pos.getValue() == 3 && bigKeypad) || (pos.getValue() == 0 && !bigKeypad))) {
                     return false;
                 }
             }
