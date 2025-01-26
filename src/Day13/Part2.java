@@ -1,10 +1,8 @@
 package Day13;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,18 +25,14 @@ public class Part2 {
         System.out.println(result);
     }
 
-    /**
-     * Credits to SimonBaars. I came here to do programing challenges not math.
-     * Solution copied from <a href="https://github.com/SimonBaars/AdventOfCode-Java/blob/master/src/main/java/com/sbaars/adventofcode/year24/days/Day13.java">https://github.com/SimonBaars/AdventOfCode-Java/blob/master/src/main/java/com/sbaars/adventofcode/year24/days/Day13.java</a>
-     */
     private static long findResult(Arcade arcade) {
-        long numerator = arcade.prizeX * arcade.buttonAY - arcade.prizeY * arcade.buttonAX;
-        long b = numerator / ((long)arcade.buttonBX * (long)arcade.buttonAY - (long)arcade.buttonBY * (long)arcade.buttonAX);
-        long remX = arcade.prizeX - b * arcade.buttonBX;
-        long l = arcade.buttonAX == 0 ? arcade.prizeY : remX;
-        long r = arcade.buttonAX == 0 ? arcade.buttonAY : arcade.buttonAX;
-        long a = l / r;
-        return (a * arcade.buttonAY + b * arcade.buttonBY == arcade.prizeY && l % r == 0) ? 3 * a + b : 0;
+        long a = arcade.prizeX * arcade.buttonBY - arcade.buttonBX * arcade.prizeY * arcade.buttonBY / arcade.buttonBY;
+        long b = arcade.prizeY * arcade.buttonAX - arcade.buttonAY * arcade.prizeX * arcade.buttonAX / arcade.buttonAX;
+        long div = ((long) arcade.buttonAX * arcade.buttonBY - (long) arcade.buttonBX * arcade.buttonAY);
+        if (a % div == 0 && b % div == 0) {
+            return (a / div) * 3 + (b / div);
+        }
+        return 0;
     }
     
     private static class Arcade {
